@@ -13,6 +13,8 @@ import android.os.PowerManager;
 import android.net.Uri;
 import android.os.Build;
 
+import javax.annotation.Nullable;
+
 
 public class RNDisableBatteryOptimizationsModule extends ReactContextBaseJavaModule implements ActivityEventListener {
 
@@ -54,22 +56,6 @@ public class RNDisableBatteryOptimizationsModule extends ReactContextBaseJavaMod
     promise.resolve(false);
   }
 
-  @Override
-  public void onActivityResult(int requestCode, int resultCode, Intent data) {
-      if (requestCode == BATTERY_OPTIMIZATION_REQUEST_CODE) {
-          if (batteryPromise != null) {
-              // Vérifiez le résultat
-              if (resultCode == Activity.RESULT_OK) {
-                  batteryPromise.resolve(true);
-              } else {
-                  batteryPromise.resolve(false);
-              }
-              batteryPromise = null; // Réinitialisez la promesse
-          }
-      }
-  }
-
-
   @ReactMethod
   public void enableBackgroundServicesDialogue() {
     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -86,6 +72,21 @@ public class RNDisableBatteryOptimizationsModule extends ReactContextBaseJavaMod
       reactContext.startActivity(myIntent);
     }
   }
+
+    @Override
+    public void onActivityResult(Activity activity, int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == BATTERY_OPTIMIZATION_REQUEST_CODE) {
+            if (batteryPromise != null) {
+                // Vérifiez le résultat
+                if (resultCode == Activity.RESULT_OK) {
+                    batteryPromise.resolve(true);
+                } else {
+                    batteryPromise.resolve(false);
+                }
+                batteryPromise = null; // Réinitialisez la promesse
+            }
+        }
+    }
 
     // Implémentation vide de onNewIntent, requise par l'interface
     @Override
